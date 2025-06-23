@@ -32,16 +32,21 @@ Tất cả các thư viện này sẽ được cài đặt tự động thông q
 ```
 /vision-mamba-cifar10/
 |
-|-- checkpoints/
-| |-- model_checkpoint_epoch_119.pth <-- Ví dụ checkpoint
-| |-- model_best_accuracy.pth <-- Ví dụ checkpoint tốt nhất
-|-- ... (các file checkpoint khác)
+|-- CheckPoint/ <-- Thư mục này sẽ được tạo sau khi giải nén
+| |-- 1/
+| | |-- model_bestcheckpoint.pth
+| |   -- model_checkpoint.pth
+| |-- 2/
+| |-- ... (cho đến thư mục 13)
+| |-- 13/
+| |-- model_bestcheckpoint.pth
+| |-- model_checkpoint.pth
 |-- visionmambademo.ipynb <-- File mã nguồn chính
 -- README.md <-- File hướng dẫn này
 ```
 
-- **`checkpoints/`**: Thư mục này dùng để chứa tất cả các file checkpoint (`.pth`) mà em đã cung cấp.
-- **`visionmambademo.ipynb`**: File Jupyter Notebook chứa toàn bộ mã nguồn để huấn luyện và đánh giá mô hình.
+- **`CheckPoint/`**: Thư mục chứa các thư mục con, mỗi thư mục con (1, 2, ..., 13) tương ứng với một phiên lưu checkpoint.
+- **`visionmambademo.ipynb`**: File Jupyter Notebook chứa toàn bộ mã nguồn.
 
 ## 3. Hướng dẫn thực thi
 
@@ -53,9 +58,13 @@ Tất cả các thư viện này sẽ được cài đặt tự động thông q
     !pip install swarms
     ```
 
-### Bước 2: Tải và thiết lập Checkpoint
-1.  Tạo một thư mục có tên là `checkpoints` cùng cấp với file `visionmambademo.ipynb`.
-2.  Sao chép tất cả các file checkpoint (`.pth`) mà em đã gửi vào trong thư mục `checkpoints` này.
+### Bước 2: Tải và Giải nén Checkpoint
+1.  **Tải file nén:** Truy cập đường dẫn Google Drive dưới đây để tải file `CheckPoint.rar` về máy.
+    > **Link tải:** [drive](https://drive.google.com/file/d/1SjfkBgYFB7PkP-v3EYzXpuf7m8fHENXI/view?usp=sharing)
+
+2.  **Giải nén:** Sử dụng phần mềm giải nén như WinRAR hoặc 7-Zip để giải nén file vừa tải. Quá trình giải nén sẽ tạo ra một thư mục tên là `CheckPoint`.
+
+3.  **Đặt đúng vị trí:** Đảm bảo rằng thư mục `CheckPoint` vừa giải nén nằm **cùng cấp** (trong cùng một thư mục) với file `visionmambademo.ipynb`.
 
 ### Bước 3: Chạy Notebook và Đánh giá mô hình
 Đây là bước quan trọng nhất. Thầy chỉ cần **chỉnh sửa một dòng mã** để chọn checkpoint muốn kiểm tra.
@@ -63,46 +72,32 @@ Tất cả các thư viện này sẽ được cài đặt tự động thông q
 1.  Trong file `visionmambademo.ipynb`, tìm đến **ô code thứ 10**. Ô này chứa đoạn mã để khởi tạo các tham số và tải checkpoint.
 
 2.  **Chỉnh sửa đường dẫn checkpoint:**
-    Tìm dòng `prev_checkpoint = "..."`. Thầy hãy thay đổi đường dẫn trong dấu ngoặc kép để trỏ đến file checkpoint mong muốn trong thư mục `checkpoints`.
+    Vì file nén chứa checkpoint của nhiều phiên huấn luyện (được đánh số từ 1 đến 13), bạn cần chỉ định rõ sẽ sử dụng bộ checkpoint từ thư mục nào.
+
+    **Chúng tôi đề nghị sử dụng checkpoint từ lần huấn luyện cuối cùng, nằm trong thư mục `13`.**
+
+    Trong file notebook, tìm dòng `prev_checkpoint = "..."` và thay thế bằng đường dẫn đầy đủ như ví dụ dưới đây.
 
     **Ví dụ:**
-    Nếu thầy muốn kiểm tra file checkpoint có tên là `model_best_accuracy.pth`, hãy sửa dòng đó thành:
-    ```python
-    # Dòng code gốc có thể là:
-    # prev_checkpoint = "/kaggle/input/visionmambademo13/pytorch/default/1/model_checkpoint.pth"
-
-    # SỬA THÀNH:
-    prev_checkpoint = "checkpoints/model_best_accuracy.pth"
-    ```
-    Hoặc nếu muốn kiểm tra một checkpoint ở epoch cụ thể, ví dụ `model_checkpoint_epoch_119.pth`:
+    Để sử dụng checkpoint **tốt nhất** từ thư mục `13`, hãy sửa dòng đó thành:
     ```python
     # SỬA THÀNH:
-    prev_checkpoint = "checkpoints/model_checkpoint_epoch_119.pth"
+    prev_checkpoint = "CheckPoint/13/model_bestcheckpoint.pth"
     ```
+    Để sử dụng checkpoint **thường** (lưu ở cuối epoch) từ thư mục `13`, hãy sửa thành:
+     ```python
+    # HOẶC SỬA THÀNH:
+    prev_checkpoint = "CheckPoint/13/model_checkpoint.pth"
+    ```
+    *(Nếu muốn dùng một phiên bản khác, ví dụ từ thư mục `10`, bạn chỉ cần thay số `13` thành `10` trong đường dẫn.)*
 
 3.  **Thực thi các ô code:**
     Sau khi đã chỉnh sửa đường dẫn, thầy thực hiện theo một trong hai kịch bản sau:
 
     **Kịch bản A: Chỉ Đánh giá kết quả (Không huấn luyện lại)**
-    Đây là kịch bản nhanh nhất để xem hiệu suất của mô hình từ một checkpoint.
-    - Chạy tuần tự các ô code từ đầu cho đến **ô code thứ 15** (ô `print(VisionMamba_model)`).
-    - **BỎ QUA (KHÔNG CHẠY)** ô code thứ 16, là ô gọi hàm `train_model(...)`.
-    - Chạy các ô code còn lại từ **ô 17 đến cuối** để xem các kết quả đánh giá:
-        - Độ chính xác tổng thể trên tập test.
-        - Ví dụ dự đoán trên ảnh ngẫu nhiên.
-        - Ma trận nhầm lẫn (Confusion Matrix).
-        - Báo cáo phân loại chi tiết (Precision, Recall, F1-score).
+    - Chạy tuần tự các ô code từ đầu cho đến **ô code thứ 15**.
+    - **BỎ QUA (KHÔNG CHẠY)** ô code thứ 16 (ô `train_model(...)`).
+    - Chạy các ô code còn lại từ **ô 17 đến cuối** để xem kết quả.
 
     **Kịch bản B: Tiếp tục Huấn luyện (Resume Training)**
-    Nếu thầy muốn tiếp tục huấn luyện mô hình từ điểm checkpoint đã chọn:
-    - Chạy tuần tự **tất cả các ô code** trong notebook từ đầu đến cuối. Quá trình huấn luyện sẽ được tiếp tục từ epoch đã lưu trong file checkpoint.
-
-## 4. Giải thích về các file Checkpoint
-Em đã cung cấp một số file checkpoint, thường bao gồm:
-- **`model_checkpoint.pth`**: File checkpoint được lưu lại ở epoch gần nhất trong quá trình huấn luyện.
-- **`model_bestcheckpoint.pth`**: File checkpoint lưu lại trọng số của mô hình tại epoch có độ chính xác (validation accuracy) cao nhất. **Đây là file được khuyến khích sử dụng để đánh giá hiệu suất cuối cùng của mô hình.**
-- Các file có tên theo epoch (ví dụ: `checkpoint_epoch_119.pth`): Checkpoint được lưu tại một epoch cụ thể để tiện theo dõi.
-
----
-Hy vọng tài liệu này sẽ giúp thầy dễ dàng chạy và kiểm tra mô hình. Nếu có bất kỳ thắc mắc nào, xin thầy cứ liên hệ với em.
-
+    - Chạy tuần tự **tất cả các ô code** trong notebook từ đầu đến cuối.
